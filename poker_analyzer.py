@@ -14,6 +14,7 @@ class Hand:
     """Représente une main de poker"""
     hand_id: str
     tournament: str
+    game_type: str  # 'MTT', 'Cash Game', 'Expresso', 'Sit & Go'
     level: str
     blinds: str
     timestamp: str
@@ -83,6 +84,9 @@ class WinamaxParser:
             level = level_match.group(1)
             blinds = blinds_match.group(1)
             timestamp = timestamp_match.group(1) if timestamp_match else ""
+            
+            # Détection du type de jeu
+            game_type = self._detect_game_type(tournament, header)
             
             # Parse la table et le bouton
             table_line = lines[1]
@@ -187,6 +191,7 @@ class WinamaxParser:
             return Hand(
                 hand_id=hand_id,
                 tournament=tournament,
+                game_type=game_type,
                 level=level,
                 blinds=blinds,
                 timestamp=timestamp,
@@ -213,6 +218,30 @@ class WinamaxParser:
         except Exception as e:
             print(f"Erreur lors du parsing d'une main: {e}")
             return None
+    
+    def _detect_game_type(self, tournament: str, header: str) -> str:
+        """Détecte le type de jeu à partir du nom du tournoi et du header"""
+        tournament_lower = tournament.lower()
+        header_lower = header.lower()
+        
+        # Détection Expresso
+        if 'expresso' in tournament_lower or 'expresso' in header_lower:
+            return 'Expresso'
+        
+        # Détection Cash Game
+        if 'cash' in tournament_lower or 'cash game' in header_lower:
+            return 'Cash Game'
+        
+        # Détection Sit & Go
+        if 'sit' in tournament_lower and 'go' in tournament_lower:
+            return 'Sit & Go'
+        
+        # Par défaut, considérer comme MTT si c'est un tournoi
+        if 'tournament' in header_lower or 'mtt' in tournament_lower:
+            return 'MTT'
+        
+        # Si aucune détection, retourner "Inconnu"
+        return 'MTT'  # Par défaut MTT car la plupart des fichiers Winamax sont des tournois
     
     def _get_position(self, hero_seat: int, button_seat: int, num_players: int) -> str:
         """Détermine la position du joueur"""

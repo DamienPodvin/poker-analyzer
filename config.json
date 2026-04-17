@@ -3,5 +3,6 @@
   "default_output_directory": "C:\\Users\\DamienPodvin\\Box\\BoxPodvinDamien\\UtilisationIA\\AnalyseMainPoker\\RapportsPDF",
   "default_hero_name": "Roll_Back",
   "auto_open_pdf": true,
-  "language": "fr"
+  "language": "fr",
+  "game_type_filter": "all"
 }

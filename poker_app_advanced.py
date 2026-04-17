@@ -114,9 +114,10 @@ def configure_app(config: Config):
     print(f"  2. Répertoire de sortie: {config.get('default_output_directory') or 'Non défini'}")
     print(f"  3. Pseudo par défaut: {config.get('default_hero_name')}")
     print(f"  4. Ouvrir le PDF automatiquement: {config.get('auto_open_pdf')}")
+    print(f"  5. Filtre type de jeu: {config.get('game_type_filter', 'all')}")
     print()
     
-    choice = input("Modifier un paramètre (1-4) ou Entrée pour continuer: ").strip()
+    choice = input("Modifier un paramètre (1-5) ou Entrée pour continuer: ").strip()
     
     if choice == '1':
         new_dir = input("Nouveau répertoire d'entrée: ").strip().strip('"').strip("'")
@@ -144,7 +145,30 @@ def configure_app(config: Config):
         config.set('auto_open_pdf', auto_open != 'n')
         print("✅ Paramètre mis à jour")
     
-    if choice in ['1', '2', '3', '4']:
+    elif choice == '5':
+        print("\nTypes de jeu disponibles:")
+        print("  1. Tous (all)")
+        print("  2. MTT uniquement")
+        print("  3. Cash Game uniquement")
+        print("  4. Expresso uniquement")
+        print("  5. Sit & Go uniquement")
+        filter_choice = input("\nVotre choix (1-5): ").strip()
+        
+        filter_map = {
+            '1': 'all',
+            '2': 'MTT',
+            '3': 'Cash Game',
+            '4': 'Expresso',
+            '5': 'Sit & Go'
+        }
+        
+        if filter_choice in filter_map:
+            config.set('game_type_filter', filter_map[filter_choice])
+            print(f"✅ Filtre mis à jour: {filter_map[filter_choice]}")
+        else:
+            print("❌ Choix invalide")
+    
+    if choice in ['1', '2', '3', '4', '5']:
         input("\nAppuyez sur Entrée pour continuer...")
 
 
@@ -246,6 +270,19 @@ def analyze_with_config(config: Config, files: List[str] = None):
     if not all_hands:
         print("\n❌ Aucune main trouvée !")
         return False
+    
+    # Appliquer le filtre de type de jeu
+    game_type_filter = config.get('game_type_filter', 'all')
+    if game_type_filter != 'all':
+        filtered_hands = [h for h in all_hands if h.game_type == game_type_filter]
+        print(f"\n🔍 Filtre appliqué: {game_type_filter}")
+        print(f"   Mains avant filtre: {len(all_hands)}")
+        print(f"   Mains après filtre: {len(filtered_hands)}")
+        all_hands = filtered_hands
+        
+        if not all_hands:
+            print(f"\n❌ Aucune main de type '{game_type_filter}' trouvée !")
+            return False
     
     print(f"\n📊 Total: {len(all_hands)} mains à analyser")
     

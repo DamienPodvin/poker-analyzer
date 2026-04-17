@@ -89,8 +89,14 @@ class PokerPDFGenerator:
     def generate_report(self, hands: List[Hand], analyzer: HandAnalyzer, hero_name: str):
         """Génère le rapport complet"""
         
+        # Calculer la répartition des types de jeu
+        game_types = {}
+        for hand in hands:
+            game_type = hand.game_type
+            game_types[game_type] = game_types.get(game_type, 0) + 1
+        
         # Page de titre
-        self._add_title_page(hero_name, len(hands))
+        self._add_title_page(hero_name, len(hands), game_types)
         
         # Résumé exécutif
         self._add_executive_summary(analyzer.statistics)
@@ -108,7 +114,7 @@ class PokerPDFGenerator:
         self.doc.build(self.story)
         print(f"✅ Rapport PDF généré: {self.output_filename}")
     
-    def _add_title_page(self, hero_name: str, num_hands: int):
+    def _add_title_page(self, hero_name: str, num_hands: int, game_types: Dict[str, int] = None):
         """Ajoute la page de titre"""
         self.story.append(Spacer(1, 2*inch))
         
@@ -120,9 +126,15 @@ class PokerPDFGenerator:
         self.story.append(subtitle)
         self.story.append(Spacer(1, 0.2*inch))
         
+        # Informations sur les types de jeu
+        game_type_info = ""
+        if game_types:
+            game_type_info = "<br/>Types de jeu: " + ", ".join([f"<b>{k}</b> ({v})" for k, v in game_types.items()])
+        
         info = Paragraph(
             f"Nombre de mains analysées: <b>{num_hands}</b><br/>"
-            f"Date du rapport: <b>{datetime.now().strftime('%d/%m/%Y %H:%M')}</b>",
+            f"Date du rapport: <b>{datetime.now().strftime('%d/%m/%Y %H:%M')}</b>"
+            f"{game_type_info}",
             self.body_style
         )
         self.story.append(info)

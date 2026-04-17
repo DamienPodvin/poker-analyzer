@@ -9,6 +9,7 @@ Application Python pour analyser vos historiques de mains Winamax et générer d
 - 🎯 **Identification des mains critiques** : all-in, gros pots, décisions importantes
 - 📄 **Rapport PDF professionnel** avec analyses et recommandations
 - 🔄 **Support multi-fichiers** : analysez plusieurs sessions en une fois
+- 🎮 **Filtrage par type de jeu** : MTT, Cash Game, Expresso, Sit & Go (NOUVEAU !)
 
 ## 🚀 Installation
 
