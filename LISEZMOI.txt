@@ -1,0 +1,88 @@
+========================================
+  ANALYSEUR DE POKER PROFESSIONNEL
+========================================
+
+INSTALLATION RAPIDE
+===================
+
+WINDOWS :
+---------
+1. Double-cliquez sur "install.bat"
+2. Attendez la fin de l'installation
+3. Double-cliquez sur "lancer.bat" pour démarrer
+
+MAC / LINUX :
+-------------
+1. Ouvrez un terminal dans ce dossier
+2. Tapez : chmod +x install.sh lancer.sh
+3. Tapez : ./install.sh
+4. Tapez : ./lancer.sh pour démarrer
+
+
+CONFIGURATION
+=============
+
+Avant la première utilisation, éditez le fichier "config.json" :
+
+1. Ouvrez config.json avec un éditeur de texte
+2. Modifiez les chemins :
+   - default_input_directory : où sont vos fichiers Winamax
+   - default_output_directory : où sauvegarder les rapports PDF
+   - default_hero_name : votre pseudo Winamax
+
+Exemple Windows :
+{
+  "default_input_directory": "C:\\Users\\VotreNom\\Documents\\Poker\\Historiques",
+  "default_output_directory": "C:\\Users\\VotreNom\\Documents\\Poker\\Rapports",
+  "default_hero_name": "VotrePseudo",
+  "auto_open_pdf": true,
+  "language": "fr"
+}
+
+
+UTILISATION
+===========
+
+1. Exportez vos historiques depuis Winamax (format .txt)
+2. Placez-les dans le répertoire configuré
+3. Lancez l'application (lancer.bat ou lancer.sh)
+4. Choisissez les fichiers à analyser
+5. Le rapport PDF est généré automatiquement
+
+
+FICHIERS NÉCESSAIRES
+====================
+
+✓ poker_analyzer.py
+✓ pdf_generator.py
+✓ poker_app.py
+✓ poker_app_advanced.py
+✓ config.json
+✓ requirements_poker.txt
+
+
+DOCUMENTATION COMPLÈTE
+======================
+
+- INSTALLATION.md : Guide d'installation détaillé
+- README_POKER.md : Documentation complète de l'application
+- GUIDE_CONFIGURATION.md : Guide de configuration avancée
+
+
+SUPPORT
+=======
+
+En cas de problème :
+1. Vérifiez que Python 3.8+ est installé : python --version
+2. Vérifiez que reportlab est installé : pip list | grep reportlab
+3. Consultez INSTALLATION.md pour plus de détails
+
+
+PRÉREQUIS
+=========
+
+- Python 3.8 ou supérieur
+- Bibliothèque reportlab (installée automatiquement)
+
+
+Bonne analyse et bonne chance aux tables ! 🎰

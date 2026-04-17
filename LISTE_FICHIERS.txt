@@ -1,0 +1,176 @@
+========================================
+  LISTE DES FICHIERS DE L'APPLICATION
+========================================
+
+FICHIERS ESSENTIELS (À COPIER OBLIGATOIREMENT)
+===============================================
+
+✅ poker_analyzer.py
+   → Moteur d'analyse des mains de poker
+   → Parse les fichiers Winamax
+   → Analyse stratégique détaillée
+
+✅ pdf_generator.py
+   → Générateur de rapports PDF
+   → Mise en forme professionnelle
+   → Tableaux et statistiques
+
+✅ poker_app.py
+   → Application simple (ligne de commande)
+   → Analyse rapide d'un fichier
+
+✅ poker_app_advanced.py
+   → Application avancée (menu interactif)
+   → Scan automatique de répertoire
+   → Configuration intégrée
+
+✅ config.json
+   → Fichier de configuration
+   → Répertoires d'entrée/sortie
+   → Paramètres personnalisables
+
+✅ requirements_poker.txt
+   → Liste des dépendances Python
+   → Nécessaire pour l'installation
+
+
+SCRIPTS D'INSTALLATION (RECOMMANDÉS)
+=====================================
+
+✅ install.bat
+   → Installation automatique Windows
+   → Vérifie Python et installe les dépendances
+
+✅ lancer.bat
+   → Lanceur rapide Windows
+   → Double-clic pour démarrer
+
+✅ install.sh
+   → Installation automatique Mac/Linux
+   → Vérifie Python et installe les dépendances
+
+✅ lancer.sh
+   → Lanceur rapide Mac/Linux
+   → Exécution en terminal
+
+
+DOCUMENTATION (OPTIONNELLE MAIS RECOMMANDÉE)
+=============================================
+
+✅ LISEZMOI.txt
+   → Instructions rapides
+   → Première lecture recommandée
+
+✅ INSTALLATION.md
+   → Guide d'installation complet
+   → Résolution de problèmes
+   → Support multi-plateformes
+
+✅ README_POKER.md
+   → Documentation complète
+   → Fonctionnalités détaillées
+   → Exemples d'utilisation
+
+✅ GUIDE_CONFIGURATION.md
+   → Configuration avancée
+   → Exemples de config.json
+   → Workflow recommandé
+
+✅ DEPLOIEMENT.md
+   → Guide de déploiement
+   → Méthodes de partage
+   → Checklist complète
+
+✅ LISTE_FICHIERS.txt
+   → Ce fichier
+   → Liste de tous les fichiers
+
+
+FICHIERS GÉNÉRÉS (NE PAS COPIER)
+=================================
+
+❌ poker_analysis_*.pdf
+   → Rapports PDF générés
+   → Créés automatiquement par l'application
+
+❌ __pycache__/
+   → Cache Python
+   → Recréé automatiquement
+
+❌ *.pyc
+   → Fichiers compilés Python
+   → Recréés automatiquement
+
+
+TAILLE TOTALE APPROXIMATIVE
+============================
+
+Fichiers essentiels : ~100 KB
+Documentation : ~50 KB
+Scripts : ~5 KB
+
+TOTAL : ~155 KB (très léger !)
+
+
+MÉTHODES DE TRANSFERT
+======================
+
+1. ZIP
+   → Compresse tous les fichiers essentiels
+   → Partage par email ou cloud
+   → Taille : ~50 KB compressé
+
+2. Clé USB
+   → Copie directe des fichiers
+   → Inclus la documentation
+
+3. Cloud (Box, Dropbox, Google Drive)
+   → Upload dans un dossier partagé
+   → Partage du lien
+
+4. Git/GitHub
+   → Clone du repository
+   → Gestion des versions
+
+
+INSTALLATION RAPIDE
+====================
+
+WINDOWS :
+1. Copie tous les fichiers essentiels
+2. Double-clic sur install.bat
+3. Édite config.json
+4. Double-clic sur lancer.bat
+
+MAC/LINUX :
+1. Copie tous les fichiers essentiels
+2. Terminal : chmod +x install.sh lancer.sh
+3. Terminal : ./install.sh
+4. Édite config.json
+5. Terminal : ./lancer.sh
+
+
+VÉRIFICATION
+============
+
+Avant de partager, vérifie que tu as :
+☑ Tous les fichiers .py (4 fichiers)
+☑ config.json
+☑ requirements_poker.txt
+☑ Scripts d'installation (4 fichiers)
+☑ Documentation (5 fichiers)
+
+TOTAL : 15 fichiers minimum
+
+
+CONTACT / SUPPORT
+=================
+
+Pour toute question :
+→ Consulte INSTALLATION.md
+→ Consulte README_POKER.md
+→ Vérifie DEPLOIEMENT.md
+
+
+Dernière mise à jour : 2024
+Version : 2.0

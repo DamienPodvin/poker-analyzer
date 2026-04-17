@@ -1,0 +1,27 @@
+﻿# Fichiers à ignorer
+
+# Historiques de mains (fichiers .txt sauf requirements)
+*FUNDAY*.txt
+*tournament*.txt
+*holdem*.txt
+
+# Rapports et outputs
+RapportsPDF/
+*.pdf
+*.zip
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
