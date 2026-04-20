@@ -4,5 +4,10 @@
   "default_hero_name": "Roll_Back",
   "auto_open_pdf": true,
   "language": "fr",
-  "game_type_filter": "all"
+  "filters": {
+    "game_type": "all",
+    "position": "all",
+    "pot_type": "all",
+    "tournament_phase": "all"
+  }
 }

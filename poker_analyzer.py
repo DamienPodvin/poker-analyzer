@@ -39,14 +39,15 @@ class Hand:
 
 
 class WinamaxParser:
-    """Parse les fichiers d'historique Winamax"""
+    """Parse les fichiers d'historique Winamax avec filtrage optimisé"""
     
-    def __init__(self, hero_name: str = "Roll_Back"):
+    def __init__(self, hero_name: str = "Roll_Back", filters: Dict = None):
         self.hero_name = hero_name
         self.hands: List[Hand] = []
+        self.filters = filters or {}
     
     def parse_file(self, filepath: str) -> List[Hand]:
-        """Parse un fichier d'historique complet"""
+        """Parse un fichier d'historique complet avec filtrage"""
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
         
@@ -55,11 +56,103 @@ class WinamaxParser:
         
         for hand_text in hand_texts:
             if hand_text.strip():
-                hand = self._parse_hand(hand_text)
-                if hand and hand.hero_cards:  # Ne garde que les mains où Hero a joué
-                    self.hands.append(hand)
+                # Pré-filtrage rapide avant parsing complet
+                if self._quick_filter(hand_text):
+                    hand = self._parse_hand(hand_text)
+                    if hand and hand.hero_cards:  # Ne garde que les mains où Hero a joué
+                        # Filtrage post-parsing (plus précis)
+                        if self._apply_filters(hand):
+                            self.hands.append(hand)
         
         return self.hands
+    
+    def _quick_filter(self, hand_text: str) -> bool:
+        """Filtrage rapide avant parsing complet (optimisation performance)"""
+        # Filtre type de jeu (sur le header)
+        if self.filters.get('game_type') and self.filters['game_type'] != 'all':
+            game_type_filter = self.filters['game_type'].lower()
+            text_lower = hand_text.lower()
+            
+            # Détection rapide du type
+            if game_type_filter == 'expresso' and 'expresso' not in text_lower:
+                return False
+            elif game_type_filter == 'cash game' and 'cash' not in text_lower:
+                return False
+            elif game_type_filter == 'sit & go' and 'sit' not in text_lower:
+                return False
+            elif game_type_filter == 'mtt' and 'tournament' not in text_lower:
+                return False
+        
+        # Filtre type de pot (recherche rapide de mots-clés)
+        if self.filters.get('pot_type'):
+            pot_type = self.filters['pot_type']
+            if pot_type == '3bet' and 'raises' not in hand_text:
+                return False
+            elif pot_type == 'all_in_preflop' and 'all-in' not in hand_text:
+                return False
+        
+        return True
+    
+    def _apply_filters(self, hand: Hand) -> bool:
+        """Applique les filtres après parsing complet"""
+        # Filtre position
+        if self.filters.get('position') and self.filters['position'] != 'all':
+            if hand.hero_position != self.filters['position']:
+                return False
+        
+        # Filtre phase du tournoi
+        if self.filters.get('tournament_phase') and self.filters['tournament_phase'] != 'all':
+            phase = self._get_tournament_phase(hand)
+            if phase != self.filters['tournament_phase']:
+                return False
+        
+        # Filtre type de pot (analyse détaillée)
+        if self.filters.get('pot_type') and self.filters['pot_type'] != 'all':
+            pot_type = self.filters['pot_type']
+            
+            if pot_type == 'open':
+                # Vérifier si Hero a ouvert (premier à raise/bet)
+                if not any('raises' in action and self.hero_name in action for action in hand.preflop_actions[:3]):
+                    return False
+            
+            elif pot_type == '3bet':
+                # Vérifier s'il y a eu un 3bet
+                raise_count = sum(1 for action in hand.preflop_actions if 'raises' in action.lower())
+                if raise_count < 2:
+                    return False
+            
+            elif pot_type == 'all_in_preflop':
+                # Vérifier all-in preflop
+                if not any('all-in' in action.lower() for action in hand.preflop_actions):
+                    return False
+            
+            elif pot_type == 'big_pot':
+                # Gros pot (>30BB)
+                blinds_parts = hand.blinds.split('/')
+                bb = int(blinds_parts[2]) if len(blinds_parts) > 2 else 200
+                if hand.pot_size <= (bb * 30):
+                    return False
+        
+        return True
+    
+    def _get_tournament_phase(self, hand: Hand) -> str:
+        """Détermine la phase du tournoi basée sur le level"""
+        try:
+            level = int(hand.level)
+            
+            # Classification basée sur les levels typiques des tournois Winamax
+            if level <= 5:
+                return 'early'  # Début de tournoi (levels 1-5)
+            elif level <= 10:
+                return 'middle'  # Milieu de tournoi (levels 6-10)
+            elif level <= 15:
+                return 'late'  # Fin de tournoi (levels 11-15)
+            elif level <= 20:
+                return 'bubble'  # Proche de la bulle (levels 16-20)
+            else:
+                return 'itm'  # In The Money (level 21+)
+        except:
+            return 'unknown'
     
     def _parse_hand(self, text: str) -> Optional[Hand]:
         """Parse une main individuelle"""
@@ -224,24 +317,25 @@ class WinamaxParser:
         tournament_lower = tournament.lower()
         header_lower = header.lower()
         
-        # Détection Expresso
+        # Détection Expresso (priorité haute)
         if 'expresso' in tournament_lower or 'expresso' in header_lower:
             return 'Expresso'
         
-        # Détection Cash Game
+        # Détection Cash Game (priorité haute)
         if 'cash' in tournament_lower or 'cash game' in header_lower:
             return 'Cash Game'
         
-        # Détection Sit & Go
-        if 'sit' in tournament_lower and 'go' in tournament_lower:
+        # Détection Sit & Go (priorité moyenne)
+        if ('sit' in tournament_lower and 'go' in tournament_lower) or 'sit&go' in tournament_lower:
             return 'Sit & Go'
         
-        # Par défaut, considérer comme MTT si c'est un tournoi
-        if 'tournament' in header_lower or 'mtt' in tournament_lower:
+        # Détection MTT - utiliser "tournament" dans le header (c'est le format Winamax standard)
+        # Tous les tournois Winamax ont "Tournament" dans le header
+        if 'tournament' in header_lower:
             return 'MTT'
         
-        # Si aucune détection, retourner "Inconnu"
-        return 'MTT'  # Par défaut MTT car la plupart des fichiers Winamax sont des tournois
+        # Par défaut MTT (car la plupart des fichiers Winamax sont des tournois)
+        return 'MTT'
     
     def _get_position(self, hero_seat: int, button_seat: int, num_players: int) -> str:
         """Détermine la position du joueur"""
