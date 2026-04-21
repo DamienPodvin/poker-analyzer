@@ -233,19 +233,15 @@ def configure_app(config: Config):
         print("\nPhases de tournoi disponibles:")
         print("  1. Toutes (all)")
         print("  2. Early (début - levels 1-5)")
-        print("  3. Middle (milieu - levels 6-10)")
-        print("  4. Late (fin - levels 11-15)")
-        print("  5. Bubble (bulle - levels 16-20)")
-        print("  6. ITM (In The Money - level 21+)")
-        filter_choice = input("\nVotre choix (1-6): ").strip()
+        print("  3. Mid (milieu - levels 6-15)")
+        print("  4. Late (fin - level 16+)")
+        filter_choice = input("\nVotre choix (1-4): ").strip()
         
         phase_map = {
             '1': 'all',
             '2': 'early',
-            '3': 'middle',
-            '4': 'late',
-            '5': 'bubble',
-            '6': 'itm'
+            '3': 'mid',
+            '4': 'late'
         }
         
         if filter_choice in phase_map:

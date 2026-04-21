@@ -136,21 +136,17 @@ class WinamaxParser:
         return True
     
     def _get_tournament_phase(self, hand: Hand) -> str:
-        """Détermine la phase du tournoi basée sur le level"""
+        """Détermine la phase du tournoi basée sur le level (simplifié)"""
         try:
             level = int(hand.level)
             
-            # Classification basée sur les levels typiques des tournois Winamax
+            # Classification simplifiée en 3 phases
             if level <= 5:
                 return 'early'  # Début de tournoi (levels 1-5)
-            elif level <= 10:
-                return 'middle'  # Milieu de tournoi (levels 6-10)
             elif level <= 15:
-                return 'late'  # Fin de tournoi (levels 11-15)
-            elif level <= 20:
-                return 'bubble'  # Proche de la bulle (levels 16-20)
+                return 'mid'  # Milieu de tournoi (levels 6-15)
             else:
-                return 'itm'  # In The Money (level 21+)
+                return 'late'  # Fin de tournoi (level 16+)
         except:
             return 'unknown'
     
