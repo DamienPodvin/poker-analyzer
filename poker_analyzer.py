@@ -48,6 +48,9 @@ class WinamaxParser:
     
     def parse_file(self, filepath: str) -> List[Hand]:
         """Parse un fichier d'historique complet avec filtrage"""
+        # IMPORTANT: Vider la liste pour éviter l'accumulation mémoire
+        file_hands = []
+        
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
         
@@ -62,9 +65,9 @@ class WinamaxParser:
                     if hand and hand.hero_cards:  # Ne garde que les mains où Hero a joué
                         # Filtrage post-parsing (plus précis)
                         if self._apply_filters(hand):
-                            self.hands.append(hand)
+                            file_hands.append(hand)
         
-        return self.hands
+        return file_hands
     
     def _quick_filter(self, hand_text: str) -> bool:
         """Filtrage rapide avant parsing complet (optimisation performance)"""

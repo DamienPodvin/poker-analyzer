@@ -120,9 +120,10 @@ def configure_app(config: Config):
     print(f"  6. Filtre position: {filters.get('position', 'all')}")
     print(f"  7. Filtre type de pot: {filters.get('pot_type', 'all')}")
     print(f"  8. Filtre phase tournoi: {filters.get('tournament_phase', 'all')}")
+    print(f"  9. Filtre mains critiques: {config.get('critical_hands_filter', 'all')}")
     print()
     
-    choice = input("Modifier un paramètre (1-8) ou Entrée pour continuer: ").strip()
+    choice = input("Modifier un paramètre (1-9) ou Entrée pour continuer: ").strip()
     
     if choice == '1':
         new_dir = input("Nouveau répertoire d'entrée: ").strip().strip('"').strip("'")
@@ -252,7 +253,26 @@ def configure_app(config: Config):
         else:
             print("❌ Choix invalide")
     
-    if choice in ['1', '2', '3', '4', '5', '6', '7', '8']:
+    elif choice == '9':
+        print("\nFiltre mains critiques:")
+        print("  1. Toutes les mains (all)")
+        print("  2. Mains gagnées uniquement (won)")
+        print("  3. Mains perdues uniquement (lost)")
+        filter_choice = input("\nVotre choix (1-3): ").strip()
+        
+        filter_map = {
+            '1': 'all',
+            '2': 'won',
+            '3': 'lost'
+        }
+        
+        if filter_choice in filter_map:
+            config.set('critical_hands_filter', filter_map[filter_choice])
+            print(f"✅ Filtre mains critiques mis à jour: {filter_map[filter_choice]}")
+        else:
+            print("❌ Choix invalide")
+    
+    if choice in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
         input("\nAppuyez sur Entrée pour continuer...")
 
 
@@ -353,19 +373,35 @@ def analyze_with_config(config: Config, files: List[str] = None):
         print(f"🔍 Filtres actifs: {', '.join(active_filters)}")
     print()
     
-    # Parser tous les fichiers AVEC filtrage optimisé
-    parser = WinamaxParser(hero_name, filters)
-    all_hands = []
+    # Parser tous les fichiers AVEC filtrage optimisé + gestion mémoire
+    import gc  # Garbage collector pour libérer la mémoire
     
-    for idx, file_path in enumerate(files, 1):
-        print(f"📖 [{idx}/{len(files)}] {Path(file_path).name}")
-        try:
-            # Le parser applique déjà les filtres pendant le parsing
-            hands = parser.parse_file(file_path)
-            all_hands.extend(hands)
-            print(f"   ✅ {len(hands)} mains extraites (après filtrage)")
-        except Exception as e:
-            print(f"   ❌ Erreur: {e}")
+    all_hands = []
+    batch_size = 100  # Traiter par batch de 100 fichiers
+    
+    for batch_start in range(0, len(files), batch_size):
+        batch_end = min(batch_start + batch_size, len(files))
+        batch_files = files[batch_start:batch_end]
+        
+        # Créer un nouveau parser pour chaque batch (évite accumulation mémoire)
+        parser = WinamaxParser(hero_name, filters)
+        
+        for idx, file_path in enumerate(batch_files, batch_start + 1):
+            print(f"📖 [{idx}/{len(files)}] {Path(file_path).name}")
+            try:
+                # Le parser applique déjà les filtres pendant le parsing
+                hands = parser.parse_file(file_path)
+                all_hands.extend(hands)
+                print(f"   ✅ {len(hands)} mains extraites (après filtrage)")
+            except Exception as e:
+                print(f"   ❌ Erreur: {e}")
+        
+        # Libérer la mémoire du parser après chaque batch
+        del parser
+        gc.collect()
+        
+        if batch_end < len(files):
+            print(f"\n🔄 Batch {batch_end}/{len(files)} terminé - Mémoire libérée\n")
     
     if not all_hands:
         print("\n❌ Aucune main trouvée correspondant aux filtres !")
@@ -385,11 +421,12 @@ def analyze_with_config(config: Config, files: List[str] = None):
     print(f"   • Mains perdues: {stats['hands_lost']}")
     print(f"   • All-in: {stats['all_in_hands']}")
     
-    # Générer le PDF
+    # Générer le PDF avec filtre mains critiques
     print(f"\n📄 Génération du rapport PDF...")
     try:
+        critical_filter = config.get('critical_hands_filter', 'all')
         pdf_gen = PokerPDFGenerator(output_path)
-        pdf_gen.generate_report(all_hands, analyzer, hero_name)
+        pdf_gen.generate_report(all_hands, analyzer, hero_name, critical_filter)
         print(f"   ✅ Rapport généré avec succès !")
         print(f"   📍 {os.path.abspath(output_path)}")
         

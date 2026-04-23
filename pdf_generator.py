@@ -86,8 +86,15 @@ class PokerPDFGenerator:
             spaceAfter=8
         )
     
-    def generate_report(self, hands: List[Hand], analyzer: HandAnalyzer, hero_name: str):
-        """Génère le rapport complet"""
+    def generate_report(self, hands: List[Hand], analyzer: HandAnalyzer, hero_name: str, critical_hands_filter: str = 'all'):
+        """Génère le rapport complet
+        
+        Args:
+            hands: Liste des mains à analyser
+            analyzer: Analyseur de mains
+            hero_name: Nom du joueur
+            critical_hands_filter: Filtre pour les mains critiques ('all', 'won', 'lost')
+        """
         
         # Calculer la répartition des types de jeu
         game_types = {}
@@ -101,8 +108,8 @@ class PokerPDFGenerator:
         # Résumé exécutif
         self._add_executive_summary(analyzer.statistics)
         
-        # Analyse des mains critiques
-        self._add_critical_hands_analysis(analyzer.get_critical_hands())
+        # Analyse des mains critiques (avec filtre)
+        self._add_critical_hands_analysis(analyzer.get_critical_hands(), critical_hands_filter)
         
         # Statistiques détaillées
         self._add_detailed_statistics(hands, analyzer.statistics)
@@ -176,17 +183,49 @@ class PokerPDFGenerator:
         self.story.append(table)
         self.story.append(Spacer(1, 0.3*inch))
     
-    def _add_critical_hands_analysis(self, critical_hands: List[Dict]):
-        """Ajoute l'analyse des mains critiques"""
+    def _add_critical_hands_analysis(self, critical_hands: List[Dict], result_filter: str = 'all'):
+        """Ajoute l'analyse des mains critiques avec filtre par résultat
+        
+        Args:
+            critical_hands: Liste des mains critiques
+            result_filter: 'all', 'won', 'lost'
+        """
         self.story.append(PageBreak())
-        self.story.append(Paragraph("🎯 ANALYSE DES MAINS CRITIQUES", self.heading_style))
+        
+        # Titre avec indication du filtre
+        title = "🎯 ANALYSE DES MAINS CRITIQUES"
+        if result_filter == 'won':
+            title += " - MAINS GAGNÉES ✅"
+        elif result_filter == 'lost':
+            title += " - MAINS PERDUES ❌"
+        
+        self.story.append(Paragraph(title, self.heading_style))
         self.story.append(Spacer(1, 0.2*inch))
         
         if not critical_hands:
             self.story.append(Paragraph("Aucune main critique identifiée.", self.body_style))
             return
         
-        for idx, item in enumerate(critical_hands[:10], 1):  # Top 10
+        # Filtrer les mains selon le résultat
+        filtered_hands = critical_hands
+        if result_filter == 'won':
+            filtered_hands = [item for item in critical_hands if item['hand'].hero_result == 'won']
+        elif result_filter == 'lost':
+            filtered_hands = [item for item in critical_hands if item['hand'].hero_result == 'lost']
+        
+        if not filtered_hands:
+            filter_text = "gagnées" if result_filter == 'won' else "perdues"
+            self.story.append(Paragraph(f"Aucune main critique {filter_text} identifiée.", self.body_style))
+            return
+        
+        # Info sur le filtrage
+        if result_filter != 'all':
+            info_text = f"<i>{len(filtered_hands)} main(s) sur {len(critical_hands)} total</i>"
+            self.story.append(Paragraph(info_text, self.body_style))
+            self.story.append(Spacer(1, 0.1*inch))
+        
+        # Afficher les mains filtrées
+        for idx, item in enumerate(filtered_hands, 1):
             hand = item['hand']
             analysis = item['analysis']
             
@@ -214,29 +253,37 @@ class PokerPDFGenerator:
             """
             self.story.append(Paragraph(info_text, self.body_style))
             
-            # Actions préflop
+            # Actions préflop (limité pour performance)
             if hand.preflop_actions:
                 self.story.append(Paragraph("<b>Préflop:</b>", self.body_style))
-                for action in hand.preflop_actions[:5]:  # Limite à 5 actions
+                for action in hand.preflop_actions[:3]:  # Limite à 3 actions clés
                     self.story.append(Paragraph(f"• {action}", self.body_style))
+                if len(hand.preflop_actions) > 3:
+                    self.story.append(Paragraph(f"<i>... et {len(hand.preflop_actions) - 3} autre(s) action(s)</i>", self.body_style))
             
             # Flop
             if hand.flop:
                 self.story.append(Paragraph(f"<b>Flop: {hand.flop}</b>", self.body_style))
-                for action in hand.flop_actions[:5]:
+                for action in hand.flop_actions[:3]:
                     self.story.append(Paragraph(f"• {action}", self.body_style))
+                if len(hand.flop_actions) > 3:
+                    self.story.append(Paragraph(f"<i>... et {len(hand.flop_actions) - 3} autre(s) action(s)</i>", self.body_style))
             
             # Turn
             if hand.turn:
                 self.story.append(Paragraph(f"<b>Turn: {hand.turn}</b>", self.body_style))
-                for action in hand.turn_actions[:5]:
+                for action in hand.turn_actions[:3]:
                     self.story.append(Paragraph(f"• {action}", self.body_style))
+                if len(hand.turn_actions) > 3:
+                    self.story.append(Paragraph(f"<i>... et {len(hand.turn_actions) - 3} autre(s) action(s)</i>", self.body_style))
             
             # River
             if hand.river:
                 self.story.append(Paragraph(f"<b>River: {hand.river}</b>", self.body_style))
-                for action in hand.river_actions[:5]:
+                for action in hand.river_actions[:3]:
                     self.story.append(Paragraph(f"• {action}", self.body_style))
+                if len(hand.river_actions) > 3:
+                    self.story.append(Paragraph(f"<i>... et {len(hand.river_actions) - 3} autre(s) action(s)</i>", self.body_style))
             
             # Résultat
             result_style = self.success_style if hand.hero_result == 'won' else self.error_style
