@@ -304,9 +304,13 @@ def select_files_from_directory(config: Config) -> List[str]:
         print(f"\n  ... et {len(files) - 20} autre(s) fichier(s)")
     
     print("\nOptions:")
-    print("  - Entrez les numéros des fichiers à analyser (ex: 1,2,3)")
+    print("  - Entrez les numéros des fichiers à analyser:")
+    print("    • Numéros individuels: 1,2,3")
+    print("    • Plages: 1-100 ou 1-100,200-300")
+    print("    • Mixte: 1,5-10,15,20-30")
     print("  - Tapez 'all' pour analyser tous les fichiers")
     print("  - Tapez 'last' pour analyser le dernier fichier")
+    print("  - Tapez 'first:N' pour les N premiers (ex: first:100)")
     print("  - Appuyez sur Entrée pour annuler")
     
     choice = input("\nVotre choix: ").strip().lower()
@@ -320,13 +324,57 @@ def select_files_from_directory(config: Config) -> List[str]:
     if choice == 'last':
         return [files[0]]
     
-    # Parse les numéros
+    # Support pour 'first:N'
+    if choice.startswith('first:'):
+        try:
+            n = int(choice.split(':')[1])
+            return files[:n]
+        except:
+            print("❌ Format invalide pour 'first:N'")
+            return []
+    
+    # Parse les numéros avec support des plages
     try:
-        indices = [int(x.strip()) - 1 for x in choice.split(',')]
-        selected = [files[i] for i in indices if 0 <= i < len(files)]
+        indices = set()
+        parts = choice.split(',')
+        
+        for part in parts:
+            part = part.strip()
+            
+            # Plage (ex: 1-100)
+            if '-' in part:
+                start, end = part.split('-')
+                start_idx = int(start.strip()) - 1
+                end_idx = int(end.strip()) - 1
+                
+                # Validation
+                if start_idx < 0 or end_idx >= len(files) or start_idx > end_idx:
+                    print(f"⚠️  Plage invalide: {part} (ignorée)")
+                    continue
+                
+                # Ajouter tous les indices de la plage
+                indices.update(range(start_idx, end_idx + 1))
+            
+            # Numéro individuel
+            else:
+                idx = int(part) - 1
+                if 0 <= idx < len(files):
+                    indices.add(idx)
+                else:
+                    print(f"⚠️  Numéro invalide: {part} (ignoré)")
+        
+        # Convertir en liste triée et récupérer les fichiers
+        selected = [files[i] for i in sorted(indices)]
+        
+        if selected:
+            print(f"\n✅ {len(selected)} fichier(s) sélectionné(s)")
+        else:
+            print("❌ Aucun fichier valide sélectionné")
+        
         return selected
-    except:
-        print("❌ Format invalide")
+        
+    except Exception as e:
+        print(f"❌ Format invalide: {e}")
         return []
 
 
